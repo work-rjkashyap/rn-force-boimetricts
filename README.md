@@ -1,79 +1,183 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# React Native Biometric Authentication
 
-# Getting Started
+A TypeScript-based React Native application that implements forced biometric (fingerprint/Face ID) authentication. The app requires biometric authentication to access any content and re-authenticates when returning from background.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Features
 
-## Step 1: Start the Metro Server
+- 🔐 Forced biometric authentication
+- 🔄 Automatic re-authentication when app returns from background
+- 📱 Support for both Face ID and Touch ID
+- 🛡️ Type-safe implementation using TypeScript
+- ⚡ Proper error handling and retry logic
+- 📱 Cross-platform support (iOS and Android)
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## Prerequisites
 
-To start Metro, run the following command from the _root_ of your React Native project:
+- Node.js >= 14
+- React Native development environment set up
+- Xcode (for iOS development)
+- Android Studio (for Android development)
 
-```bash
-# using npm
-npm start
+## Installation
 
-# OR using Yarn
-yarn start
-```
+1. Clone the repository or copy the project files
 
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
+2. Install dependencies:
 
 ```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npm install
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+3. Install required packages:
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+```bash
+npm install @react-navigation/native @react-navigation/native-stack react-native-biometrics react-native-screens react-native-safe-area-context
+```
 
-## Step 3: Modifying your App
+4. Install dev dependencies:
 
-Now that you have successfully run the app, let's modify it.
+```bash
+npm install --save-dev typescript @types/react @types/react-native
+```
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+## Platform-Specific Setup
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+### iOS
 
-## Congratulations! :tada:
+1. Navigate to the iOS folder and install pods:
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
+cd ios && pod install
+```
 
-### Now what?
+2. Add the following to your `Info.plist`:
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+```xml
+<key>NSFaceIDUsageDescription</key>
+<string>Authentication is required to use this app</string>
+```
 
-# Troubleshooting
+### Android
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+No additional setup required for Android as the necessary permissions are included in the package.
 
-# Learn More
+## Project Structure
 
-To learn more about React Native, take a look at the following resources:
+```
+your-project/
+  ├── App.tsx                 # Main application component
+  ├── babel.config.js         # Babel configuration
+  ├── tsconfig.json          # TypeScript configuration
+  ├── types/
+  │   └── navigation.ts      # Navigation type definitions
+  └── screens/
+      ├── AuthenticationScreen.tsx  # Biometric authentication screen
+      └── HomeScreen.tsx           # Protected home screen
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Usage
+
+The app implements a simple flow:
+
+1. On startup, the app checks for biometric capability
+2. If biometrics is available, it prompts for authentication
+3. Upon successful authentication, the user is taken to the home screen
+4. When the app comes back from background, it re-authenticates
+
+### Key Components
+
+#### AuthenticationScreen
+
+Handles the biometric authentication process:
+
+- Checks device compatibility
+- Manages authentication flow
+- Handles errors and retries
+
+```typescript
+// Example usage in another component
+navigation.navigate('Authentication');
+```
+
+#### HomeScreen
+
+Protected content that's only accessible after authentication:
+
+- Monitors app state
+- Triggers re-authentication when needed
+- Displays authenticated content
+
+## Error Handling
+
+The app handles various scenarios:
+
+- Device without biometric capabilities
+- Failed authentication attempts
+- Cancelled authentication
+- Background/foreground transitions
+
+## Customization
+
+### Modifying Authentication Messages
+
+In `AuthenticationScreen.tsx`, you can customize the prompts:
+
+```typescript
+const {success} = await rnBiometrics.simplePrompt({
+  promptMessage: 'Your custom message here',
+  cancelButtonText: 'Custom cancel text',
+  fallbackPromptMessage: 'Custom fallback message',
+});
+```
+
+### Styling
+
+Each screen contains a `StyleSheet` object that you can modify to match your app's design:
+
+```typescript
+const styles = StyleSheet.create({
+  container: {
+    // Your custom styles
+  },
+});
+```
+
+## Security Considerations
+
+- The app forces biometric authentication on every launch
+- Re-authentication is required when returning from background
+- No biometric data is stored in the app
+- Uses system-level biometric APIs
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. Biometrics not working on simulator
+
+   - Use physical device for testing biometrics
+
+2. iOS build fails
+
+   - Ensure pods are installed
+   - Check Info.plist configuration
+
+3. Android authentication not showing
+   - Verify device has fingerprint/face recognition set up
+   - Check Android SDK version compatibility
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details
+
+## Support
+
+For issues and feature requests, please create an issue in the repository.
